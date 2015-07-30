@@ -11,6 +11,9 @@ func Exec(cmd string, user string, host string) error {
 		return err
 	}
 
+	// Wait for the host to come up, otherwise our command will fail.
+	wait(host)
+
 	config, err := newSshClientConfig(host, user)
 	if err != nil {
 		return err

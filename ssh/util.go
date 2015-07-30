@@ -6,6 +6,8 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
+	"errors"
 )
 
 func loadIdentity(userName, identity string) ([]byte, error) {
@@ -33,4 +35,21 @@ func cleanHost(host string) (string, error) {
 		port = "22"
 	}
 	return net.JoinHostPort(h, port), nil
+}
+
+func wait(host string) error {
+	times := 0
+	for {
+		_, err := net.Dial("tcp", host)
+		if err != nil {
+			// We need to make sure we have not created a loop.
+			if times >= 10 {
+				return errors.New("Cannot connect to the host after "+string(times)+" attemps")
+			}
+		} else {
+			// The port has become available.
+			return nil
+		}
+		time.Sleep(10000 * time.Millisecond)
+	}
 }
